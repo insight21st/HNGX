@@ -1,0 +1,46 @@
+from fastapi import FastAPI, HTTPException
+from datetime import datetime, timedelta
+from pytz import timezone, utc
+from pydantic import BaseModel
+
+app = FastAPI()
+
+# Define a Pydantic model for query parameters
+class QueryParams(BaseModel):
+    slack_name: 'Ezeks'
+    track: 'Backend'
+
+# Helper function to validate UTC time with +/-2 hours
+def validate_utc_time():
+    utc_now = datetime.now(utc)
+    utc_plus_2 = utc_now + timedelta(hours=2)
+    utc_minus_2 = utc_now - timedelta(hours=2)
+    return utc_minus_2 <= utc_now <= utc_plus_2
+
+@app.get("/info", response_model=dict)
+async def get_info(params: QueryParams):
+    # Validate UTC time
+    is_valid_utc = validate_utc_time()
+
+    if not is_valid_utc:
+        raise HTTPException(status_code=400, detail="UTC time is not within +/-2 hours.")
+
+    # Current day of the week
+    current_day = datetime.now(utc).astimezone(timezone('UTC+2')).strftime('%A')
+
+    # GitHub URL of the file being run (replace with your repo and file URL)
+    github_file_url = 'https://github.com/insight21st/HNGX/blob/main/endpoint.py'
+
+    # GitHub URL of the full source code (replace with your repo URL)
+    github_source_url = 'https://github.com/insight21st/HNGX'
+
+    data = {
+        'Slack name': params.slack_name,
+        'Current day of the week': current_day,
+        'Current UTC time (UTC+2)': datetime.now(utc).astimezone(timezone('UTC+2')).strftime('%Y-%m-%d %H:%M:%S'),
+        'Track': params.track,
+        'GitHub URL of the file being run': github_file_url,
+        'GitHub URL of the full source code': github_source_url
+    }
+
+    return data

@@ -9,37 +9,18 @@ app = Flask(__name__)
 @app.route('/api', methods=['GET'])
 def run():
     try:
-        # Slack name
-        slack_name = request.args.get('candidate', 'Ezeks')
-
-        # Current day of the week
-        current_day = datetime.datetime.today().strftime('%A')
-
-        # Current UTC time with validation of +/-2
-        utc_time = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%Sz')
-
-        # Track
-        track = request.args.get('Track' 'backend')
-
-        # GitHub URL of the file being run
-        github_file_url = 'https://github.com/insight21st/HNGX/blob/main/endpoint'
-
-        # GitHub URL of the full source code
-        github_source_url = 'https://github.com/insight21st/HNGX'
-
-        data = {
-            'Slack name': slack_name,
-            'Current day of the week': current_day,
-            'Current UTC time (UTC+2)': utc_time,
-            'Track': track,
-            'GitHub URL of the file being run': github_file_url,
-            'GitHub URL of the full source code': github_source_url,
+        #JSON output at endpoint
+        output = {
+            "slack_name": request.args.get('slack_name', 'input_name'),
+            "current_day": datetime.date.today().strftime('%A'),
+            "utc_time": datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            "track": request.args.get('track', 'input_track'),
+            "github_file_url": "https://github.com/insight21st/HNGX/blob/main/endpoint.py",
+            "github_repo_url": "https://github.com/insight21st/HNGX",
             "status_code": "200"
         }
-        return json.dumps(data, indent=None, sort_keys=False), 200, {'Content-Type': 'application/json'}
+
+        return json.dumps(output, indent=None, sort_keys=False), 200, {'Content-Type': 'application/json'} #return JSON output
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        return jsonify({"error": str(e)}), 400 #Error Handling
